@@ -1,4 +1,6 @@
-<?php namespace App\Controllers\Admin;
+<?php
+
+namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Models\Kategori_M;
@@ -11,44 +13,65 @@ class Kategori extends BaseController
 		echo '<h1>belajar ci4</h1>';
 	}
 
-	public function select()
+	public function read()
 	{
+		$pager = \Config\Services::pager();
 		$model = new Kategori_M();
-		$kategori = $model -> findAll();
 
 		$data = [
-			'judul' => 'SELECT DATA Dari Controller',
+			'judul' => 'DATA KATEGORI',
+			'kategori' => $model->paginate(3, 'group1'),
+			'pager' => $model->pager
+		];
+
+		return view("Kategori/Select", $data);
+	}
+
+	public function create()
+	{
+		return view("Kategori/insert");
+	}
+
+	public function insert()
+	{
+		$model = new Kategori_M();
+
+		if ($model->insert($_POST) === false) {
+			$error = $model->errors();
+			session()->setFlashdata('info', $error['kategori']);
+			return redirect()->to(base_url("/admin/kategori/create"));
+		} else {
+			return redirect()->to(base_url("/admin/kategori"));
+		}
+	}
+
+	public function find($id = null)
+	{
+		$model = new Kategori_M();
+		$kategori = $model->find($id);
+
+		$data = [
+			'judul' => 'UPDATE DATA',
 			'kategori' => $kategori
 		];
 
-		return view ("Kategori/Select", $data);
+		return view("Kategori/Update", $data);
 	}
 
-	public function selectWhere($id = null)
+	public function update()
 	{
-		echo "<h1>menampilkan data yang dipilih $id</h1>";
-	}
+		$model = new Kategori_M();
+		$model->save($_POST);
 
-	public function formInsert()
-	{
-		return view ("Kategori/Forminsert");
-	}
-
-	public function formUpdate($id = null)
-	{
-		echo view ("Template/Header");
-		echo view ("Kategori/Update");
-		echo view ("Template/Footer");
-	}
-
-	public function update($id = null)
-	{
-		echo "proses update data $id";
+		return redirect()->to(base_url("/admin/kategori"));
 	}
 
 	public function delete($id = null)
 	{
-		echo "proses delete data";
+		$model = new Kategori_M();
+		$model->delete($id);
+
+		return redirect()->to(base_url("/admin/kategori"));
 	}
 
 	//--------------------------------------------------------------------
